@@ -101,7 +101,10 @@ site2008df<-as.numeric(as.matrix(site2008df[,-1]))
 sitelist<-list("2008"=site2008df,"2013"=site2013df,"2019"=site2019df)
 
 siteplot<-iNEXT(sitelist,q=0,datatype="incidence_freq")
-plot(siteplot,se=0)
+ggiNEXT(siteplot,se=F)+
+  theme_classic()+
+  theme(legend.position = "bottom",plot.margin = unit(c(0,0.5,0,0.5),"cm"))
+# ggsave("sample site.png",width = 15,height = 10,units = "cm")
 
 # Hurlbert's Expected Number of Species -----------------------------------
 library(benthos)
@@ -152,7 +155,9 @@ ggplot(data = rqdfall,aes(x=year,y=s,group=1))+
   # geom_smooth(method = "lm",se=F,color="black")+
   geom_point(data = rqdfmean,aes(x=year,y=S),inherit.aes = F)+
   geom_errorbar(data = rqstd,aes(x=year,ymin=S-std,ymax=S+std),inherit.aes = F,width=0.2)+
+  labs(y="Rarefaction index")+
   theme_classic()
+# ggsave("Rarefaction index.png",width = 10,height = 10,units = "cm")
 
 
 # Differences in the rarefaction index ------------------------------------
@@ -172,12 +177,12 @@ ggplot(data = rqdiffdf,aes(x=year,y=rdiffmean))+
   geom_abline(slope = 0)+
   labs(y="Differences in the rarefaction index")+
   theme_classic()
+# ggsave("Differences in the rarefaction index.png",width = 10,height = 10,units = "cm")
 
 
 # The effect of mortality (ED) and recruitment (ER) on species diversity --------
 dtdead<-dt %>%
   filter(.,b==0) %>%
-  mutate(.,dead08=ifelse(D08==0 | D08==-1,1,0)) %>%
   mutate(.,dead13=ifelse((D08!=0 & D08!=-1) & (D13==0 | D13==-1),1,0)) %>%
   mutate(.,dead19=ifelse((D13!=0 & D13!=-1) & (S19==0 | S19==-1),1,0))
 
