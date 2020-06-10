@@ -1,3 +1,4 @@
+library(Rmisc)
 library(dplyr)
 library(magrittr)
 library(ggplot2)
@@ -170,14 +171,18 @@ rqdfall_diff<-rqdfall_bycols %>%
 rqdiffdf<-data.frame(year=c("2008-2013","2013-2019"),
                      rdiffmean=c(mean(rqdfall_diff$diff1st),mean(rqdfall_diff$diff2nd)),
                      rdiffsd=c(sd(rqdfall_diff$diff1st),sd(rqdfall_diff$diff2nd)))
+rqdiffci<-t(data.frame(CI(rqdfall_diff$diff1st),CI(rqdfall_diff$diff2nd))) %>%
+  as.data.frame(.) %>%
+  add_column(.,year=c("2008-2013","2013-2019"),.before = 1)
+rownames(rqdiffci)<-NULL
 
 ggplot(data = rqdiffdf,aes(x=year,y=rdiffmean))+
   geom_point()+
-  geom_errorbar(data = rqdiffdf,aes(x=year,ymin=rdiffmean-rdiffsd,ymax=rdiffmean+rdiffsd),inherit.aes = F,width=0.2)+
+  geom_errorbar(data = rqdiffci,aes(x=year,ymin=lower,ymax=upper),inherit.aes = F,width=0.2)+
   geom_abline(slope = 0)+
   labs(y="Differences in the rarefaction index")+
   theme_classic()
-# ggsave("Differences in the rarefaction index.png",width = 10,height = 10,units = "cm")
+# ggsave("fig3_Differences in the rarefaction index.png",width = 10,height = 10,units = "cm")
 
 
 # The effect of mortality (ED) and recruitment (ER) on species diversity --------
@@ -226,11 +231,14 @@ edall %<>% mutate(.,diff2013=rd2013-s2008,diff2019=rd2019-s2013)
 eddf<-data.frame(year=c("2008-2013","2013-2019"),
                  edmean=c(mean(edall$diff2013),mean(edall$diff2019)),
                  edsd=c(sd(edall$diff2013),sd(edall$diff2019)))
+edci<-t(data.frame(CI(edall$diff2013),CI(edall$diff2019))) %>%
+  as.data.frame(.) %>%
+  add_column(.,year=c("2008-2013","2013-2019"),.before = 1)
+rownames(edci)<-NULL
 
 edplot<-ggplot(data = eddf,aes(x=year,y=edmean))+
   geom_point()+
-  geom_errorbar(data = eddf,aes(x=year,ymin=edmean-edsd,ymax=edmean+edsd),inherit.aes = F)+
-  ylim(-0.4,0.4)+
+  geom_errorbar(data = edci,aes(x=year,ymin=lower,ymax=upper),inherit.aes = F)+
   geom_abline(slope = 0)+
   labs(y="Effect of mortality on\n species diversity")+
   theme_classic()
@@ -263,10 +271,15 @@ erall %<>% mutate(.,diff2013=rr2013-s2008,diff2019=rr2019-s2013)
 erdf<-data.frame(year=c("2008-2013","2013-2019"),
                  ermean=c(mean(erall$diff2013),mean(erall$diff2019)),
                  ersd=c(sd(erall$diff2013),sd(erall$diff2019)))
+erci<-t(data.frame(CI(erall$diff2013),CI(erall$diff2019))) %>%
+  as.data.frame(.) %>%
+  add_column(.,year=c("2008-2013","2013-2019"),.before = 1)
+rownames(erci)<-NULL
 
 erplot<-ggplot(data = erdf,aes(x=year,y=ermean))+
   geom_point()+
-  geom_errorbar(data = erdf,aes(x=year,ymin=ermean-ersd,ymax=ermean+ersd),inherit.aes = F)+
+  geom_errorbar(data = erci,aes(x=year,ymin=lower,ymax=upper),inherit.aes = F)+
+  ylim(-0.05,0.15)+
   geom_abline(slope = 0)+
   labs(y="Effect of recruitment on\n species diversity")+
   theme_classic()
@@ -274,4 +287,4 @@ erplot
 
 bindplot<-plot_grid(edplot,erplot,ncol = 2,labels = "AUTO")
 bindplot
-# ggsave("ed and er plot.png",width = 20,height = 10,units = "cm")
+# ggsave("fig4_ed and er plot.png",width = 20,height = 10,units = "cm")
